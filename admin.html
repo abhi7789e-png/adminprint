@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Srinibas CyberPrint HUD</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070913;
+      --card-bg: rgba(13, 19, 36, 0.7);
+      --accent-cyan: #00f2fe;
+      --accent-blue: #4facfe;
+      --neon-green: #00ff87;
+      --neon-red: #ff0055;
+      --border-glow: rgba(0, 242, 254, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 0, 85, 0.06) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+      font-family: 'Rajdhani', sans-serif;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 30px;
+      overflow-x: hidden;
+    }
+
+    /* Top HUD Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-glow);
+      margin-bottom: 30px;
+    }
+
+    .brand-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--neon-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--neon-green);
+      animation: pulse 1.5s infinite;
+    }
+
+    .system-status {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--accent-cyan);
+      background: rgba(0, 242, 254, 0.1);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border-glow);
+    }
+
+    /* Main Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2.2fr 1fr;
+      gap: 30px;
+      flex: 1;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+      position: relative;
+    }
+
+    /* Futuristic Corner Borders */
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: -1px;
+      width: 20px; height: 20px;
+      border-top: 3px solid var(--accent-cyan);
+      border-left: 3px solid var(--accent-cyan);
+      border-top-left-radius: 16px;
+    }
+    .glass-card::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; right: -1px;
+      width: 20px; height: 20px;
+      border-bottom: 3px solid var(--accent-cyan);
+      border-right: 3px solid var(--accent-cyan);
+      border-bottom-right-radius: 16px;
+    }
+
+    /* Side Panel & Holographic QR */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .qr-container {
+      position: relative;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      border-radius: 16px;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .qr-container img {
+      display: block;
+      border-radius: 8px;
+      filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.3));
+    }
+
+    /* Animated Laser Scanner Line */
+    .laser-line {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      box-shadow: 0 0 15px var(--accent-cyan);
+      animation: scan 2.5s ease-in-out infinite;
+    }
+
+    /* Specs Badge Strip */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 15px 0;
+    }
+
+    .spec-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    .spec-label { color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+    .spec-val { font-weight: 700; color: #fff; font-size: 15px; margin-top: 2px; }
+
+    /* Interactive Action Buttons */
+    .btn-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .hud-btn {
+      flex: 1;
+      padding: 14px 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-approve {
+      background: linear-gradient(135deg, #00b09b, var(--neon-green));
+      color: #05140e;
+      box-shadow: 0 0 20px rgba(0, 255, 135, 0.3);
+    }
+    .btn-approve:hover {
+      box-shadow: 0 0 35px rgba(0, 255, 135, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-reject {
+      background: transparent;
+      color: var(--neon-red);
+      border: 1px solid var(--neon-red);
+    }
+    .btn-reject:hover {
+      background: rgba(255, 0, 85, 0.1);
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Preview Screen */
+    iframe, img.preview {
+      width: 100%;
+      height: 400px;
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      border-radius: 10px;
+      background: #02040a;
+      margin-top: 15px;
+    }
+
+    /* Waiting Radar UI */
+    .waiting-box {
+      height: 350px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      gap: 15px;
+    }
+
+    .radar-circle {
+      width: 60px; height: 60px;
+      border: 2px dashed rgba(0, 242, 254, 0.3);
+      border-radius: 50%;
+      animation: rotate 8s linear infinite;
+    }
+
+    /* Keyframes */
+    @keyframes scan {
+      0%, 100% { top: 0%; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 96%; opacity: 0; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    @keyframes rotate { 100% { transform: rotate(360deg); } }
+  </style>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+  <!-- Top Status Bar -->
+  <header>
+    <div class="brand-title">
+      <div class="pulse-dot"></div>
+      Srinibas // CyberPrint Terminal
+    </div>
+    <div class="system-status">LINK ACTIVE &bull; 4G/5G READY</div>
+  </header>
+
+  <!-- Dashboard Main Grid -->
+  <div class="dashboard-grid">
+    
+    <!-- Main Print Job Panel -->
+    <div class="glass-card">
+      <h2 style="font-family:'Orbitron'; font-size:18px; letter-spacing:1px; color:var(--accent-cyan); margin-bottom:15px;">
+        TRANSMISSION QUEUE
+      </h2>
+
+      <div id="job-container">
+        <div class="waiting-box">
+          <div class="radar-circle"></div>
+          <p style="font-family:'Orbitron'; font-size:12px; letter-spacing:2px;">AWAITING CUSTOMER UPLOAD...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side Scanner / QR Code Panel -->
+    <div class="glass-card side-panel">
+      <h3 style="font-family:'Orbitron'; font-size:14px; letter-spacing:1px; color:#fff;">SCAN ACCESS CODE</h3>
+      <p style="font-size:13px; color:#94a3b8; margin-top:4px;">Direct Mobile Uplink (4G / 5G)</p>
+      
+      <div class="qr-container">
+        <div class="laser-line"></div>
+        <!-- Replace YOUR_GITHUB_USERNAME with your real GitHub repo username -->
+        <img id="qr-code" width="190" height="190" src="https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=https://YOUR_GITHUB_USERNAME.github.io/print-station/" alt="Scan QR" />
+      </div>
+
+      <div style="font-size:12px; color:var(--accent-cyan); letter-spacing:1px;">
+        STATUS: ONLINE
+      </div>
+    </div>
+
+  </div>
+
+  <iframe id="print-frame" style="display:none;"></iframe>
+
+  <script>
+      const firebaseConfig = {
+       apiKey: "AIzaSyBOE1m_P-cnB-D79QKh0Hkp4VT-bG0BcuY",
+  authDomain: "auto-print-8e959.firebaseapp.com",
+  databaseURL: "https://auto-print-8e959-default-rtdb.firebaseio.com",
+  projectId: "auto-print-8e959",
+  appId: "1:718790139534:web:0285bace5f866e10d633df"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let initialLoad = true;
+    let currentFile = null;
+    let currentJobKey = null;
+
+    // Synthesized Sci-Fi Notification Tone
+    function playFuturisticAlert() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+        osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    // Realtime listener
+    db.ref('print_jobs').limitToLast(1).on('child_added', snapshot => {
+      if (initialLoad) return;
+
+      const data = snapshot.val();
+      currentJobKey = snapshot.key;
+      currentFile = data;
+
+      const preview = data.fileType && data.fileType.includes("image")
+        ? `<img src="${data.fileData}" class="preview"/>`
+        : `<iframe src="${data.fileData}"></iframe>`;
+
+      playFuturisticAlert();
+
+      document.getElementById("job-container").innerHTML = `
+        <div style="animation: pulse 0.5s ease-out;">
+          <h3 style="color:#fff; font-size:18px;">📄 ${data.fileName}</h3>
+          
+          <div class="specs-grid">
+            <div class="spec-box">
+              <div class="spec-label">Paper Type</div>
+              <div class="spec-val">${data.paperType || 'Standard A4'}</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-label">Orientation</div>
+              <div class="spec-val">${data.orientation || 'Portrait'}</div>
+            </div>
+            <div class="spec-box">
+              <div class="spec-label">Color Mode</div>
+              <div class="spec-val" style="color:var(--accent-cyan);">${data.colorMode || 'Black & White'}</div>
+            </div>
+          </div>
+
+          ${preview}
+
+          <div class="btn-group">
+            <button class="hud-btn btn-approve" onclick="approveAndPrint()">Authorize & Print</button>
+            <button class="hud-btn btn-reject" onclick="rejectJob()">Dismiss</button>
+          </div>
+        </div>
+      `;
+    });
+
+    setTimeout(() => { initialLoad = false; }, 1500);
+
+    function scheduleJobCleanup(jobKey) {
+      if (!jobKey) return;
+      setTimeout(() => {
+        db.ref(`print_jobs/${jobKey}`).remove().catch(() => {});
+      }, 5 * 60 * 1000);
+    }
+
+    function approveAndPrint() {
+      if (!currentFile) return;
+
+      const base64Data = currentFile.fileData;
+      const isImage = currentFile.fileType && currentFile.fileType.includes("image");
+      const keyToDelete = currentJobKey;
+
+      if (isImage) {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+          <html>
+            <body style="margin:0; display:flex; justify-content:center; align-items:center;">
+              <img src="${base64Data}" style="max-width:100%; max-height:100vh;" onload="window.print(); window.close();" />
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      } else {
+        fetch(base64Data)
+          .then(res => res.blob())
+          .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const frame = document.getElementById("print-frame");
+            frame.src = blobUrl;
+            frame.onload = () => {
+              frame.contentWindow.focus();
+              frame.contentWindow.print();
+            };
+          });
+      }
+
+      scheduleJobCleanup(keyToDelete);
+      document.getElementById("job-container").innerHTML = `
+        <div class="waiting-box" style="color: var(--neon-green);">
+          <div class="pulse-dot" style="transform:scale(2);"></div>
+          <p style="font-family:'Orbitron'; font-size:14px; letter-spacing:2px;">PRINT DISPATCHED &bull; AUTO-CLEANUP ARMED</p>
+        </div>
+      `;
+      currentFile = null;
+    }
+
+    function rejectJob() {
+      if (currentJobKey) scheduleJobCleanup(currentJobKey);
+      currentFile = null;
+      document.getElementById("job-container").innerHTML = `
+        <div class="waiting-box">
+          <div class="radar-circle"></div>
+          <p style="font-family:'Orbitron'; font-size:12px; letter-spacing:2px;">JOB REJECTED &bull; AWAITING NEXT STREAM...</p>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
